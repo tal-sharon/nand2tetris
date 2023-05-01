@@ -1,0 +1,164 @@
+class Dog {
+
+   field int x, y, location;
+   field int memAddress;
+   field bool horizontalMovement;
+   field bool verticalMovement;
+   field int a;
+
+   /** Constructs a new dog. */
+   constructor Dog new(int Ax, int Ay) {
+    let x = Ax;
+    let y = Ay;
+    do location_calc();
+    do draw();
+    let horizontalMovement = true;
+    let verticalMovement = true;
+    let a = 0;
+    return this;
+   }
+
+    method void location_calc(){
+    let location = x+(16*32*y);
+    return;
+    }
+
+   method void dispose() {
+      do Memory.deAlloc(this);
+      return;
+   }
+
+   method void draw() {
+      let memAddress = 16384+location;
+      do Memory.poke(memAddress+0, 6168);
+      do Memory.poke(memAddress+32, 9252);
+      do Memory.poke(memAddress+64, 17378);
+      do Memory.poke(memAddress+96, -32767);
+      do Memory.poke(memAddress+128, -32767);
+      do Memory.poke(memAddress+160, -28087);
+      do Memory.poke(memAddress+192, -24571);
+      do Memory.poke(memAddress+224, 20490);
+      do Memory.poke(memAddress+256, 5064);
+      do Memory.poke(memAddress+288, 6552);
+      do Memory.poke(memAddress+320, 2064);
+      do Memory.poke(memAddress+352, 3504);
+      do Memory.poke(memAddress+384, 1056);
+      do Memory.poke(memAddress+416, 960);
+      do Memory.poke(memAddress+448, 0);
+      do Memory.poke(memAddress+480, 0);
+      return;
+   }
+
+   /** Erases the Dog from the screen. */
+   method void erase() {
+      let memAddress = 16384+location;
+      do Memory.poke(memAddress+0, 0);
+      do Memory.poke(memAddress+32, 0);
+      do Memory.poke(memAddress+64, 0);
+      do Memory.poke(memAddress+96, 0);
+      do Memory.poke(memAddress+128, 0);
+      do Memory.poke(memAddress+160, 0);
+      do Memory.poke(memAddress+192, 0);
+      do Memory.poke(memAddress+224, 0);
+      do Memory.poke(memAddress+256, 0);
+      do Memory.poke(memAddress+288, 0);
+      do Memory.poke(memAddress+320, 0);
+      do Memory.poke(memAddress+352, 0);
+      do Memory.poke(memAddress+384, 0);
+      do Memory.poke(memAddress+416, 0);
+      do Memory.poke(memAddress+448, 0);
+      do Memory.poke(memAddress+480, 0);
+      return;
+   }
+
+
+
+   /** Moves the dog up 16. */
+   method void moveUp() {
+      if (y > 0) {
+        do erase();
+        let y = y-1;
+        do location_calc();
+        do draw();
+      }
+      return;
+   }
+
+   /** Moves the Dog down by 16 pixels. */
+   method void moveDown() {
+      if (y < 15) {
+        do erase();
+        let y = y+1;
+        do location_calc();
+        do draw();
+      }
+      return;
+   }
+
+   /** Moves the Dog left by 16 pixels. */
+   method void moveLeft() {
+      if (x > 0) {
+        do erase();
+        let x = x-1;
+        do location_calc();
+        do draw();
+      }
+      return;
+   }
+
+   /** Moves the Dog right by 16 pixels. */
+   method void moveRight() {
+      if (x < 31) {
+        do erase();
+        let x = x+1;
+        do location_calc();
+        do draw();
+      }
+      return;
+   }
+
+   method void move(int catY) {
+      let a = a+1;
+      if (a>15) {
+         if (horizontalMovement) {
+            do moveRight();
+            if (x=31) {
+               let horizontalMovement = false;
+            }
+         }
+         if (horizontalMovement=false) {
+            do moveLeft();
+            if (x=0) {
+               let horizontalMovement = true;
+            }
+         }
+         if (verticalMovement) {
+            do moveUp();
+            if (y<catY) {
+               let y = catY;
+               let verticalMovement = false;
+            }
+         }
+         if (verticalMovement=false) {
+            do moveDown();
+            if (y > 10) {
+               let verticalMovement = true;
+            }
+         }
+         let a = 0;
+         }
+      return;
+   }
+
+   method int getx(){
+   return x;
+   }
+
+   method int gety(){
+   return y;
+   }
+
+   method int getlocation(){
+   return location;
+   }
+}

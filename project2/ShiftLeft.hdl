@@ -1,0 +1,48 @@
+// This file is part of nand2tetris, as taught in The Hebrew University, and
+// was written by Aviv Yaish. It is an extension to the specifications given
+// [here](https://www.nand2tetris.org) (Shimon Schocken and Noam Nisan, 2017),
+// as allowed by the Creative Common Attribution-NonCommercial-ShareAlike 3.0
+// Unported [License](https://creativecommons.org/licenses/by-nc-sa/3.0/).
+
+/**
+ * 16-bit left shifter.
+ *
+ * The chip's output is a "left-shift" of the input:
+ * - Every input bit is moved one position to the left
+ * - A new "0" bit is inserted as the new right-most bit
+ *
+ * For example:
+ * ShiftLeft(0000000000000001)=0000000000000010 // ShiftLeft(1)=2
+ * ShiftLeft(0100000000000000)=1000000000000000
+ * ShiftLeft(1000000000000000)=0000000000000000
+ *
+ * This operation is (usually) equivalent to multiplying the input by 2.
+ * This definition is also called an arithmetic left-shift, and is useful for
+ * the efficient implementation of various operations which we will see later on
+ * in the course.
+ */
+
+CHIP ShiftLeft{
+    IN in[16];
+    OUT out[16];
+     
+    PARTS:
+	// Put you code here:
+    Mux(a=in[15], b=in[14], sel=true, out=out[15]);
+    Mux(a=in[15], b=in[13], sel=true, out=out[14]);
+    Mux(a=in[15], b=in[12], sel=true, out=out[13]);
+    Mux(a=in[15], b=in[11], sel=true, out=out[12]);
+    Mux(a=in[15], b=in[10], sel=true, out=out[11]);
+    Mux(a=in[15], b=in[9], sel=true, out=out[10]);
+    Mux(a=in[15], b=in[8], sel=true, out=out[9]);
+    Mux(a=in[15], b=in[7], sel=true, out=out[8]);
+    Mux(a=in[15], b=in[6], sel=true, out=out[7]);
+    Mux(a=in[15], b=in[5], sel=true, out=out[6]);
+    Mux(a=in[15], b=in[4], sel=true, out=out[5]);
+    Mux(a=in[15], b=in[3], sel=true, out=out[4]);
+    Mux(a=in[15], b=in[2], sel=true, out=out[3]);
+    Mux(a=in[15], b=in[1], sel=true, out=out[2]);
+    Mux(a=in[15], b=in[0], sel=true, out=out[1]);
+    Mux(a=in[15], b=false, sel=true, out=out[0]);
+
+}

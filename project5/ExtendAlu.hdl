@@ -1,0 +1,50 @@
+// This file is part of nand2tetris, as taught in The Hebrew University, and
+// was written by Aviv Yaish. It is an extension to the specifications given
+// [here](https://www.nand2tetris.org) (Shimon Schocken and Noam Nisan, 2017),
+// as allowed by the Creative Common Attribution-NonCommercial-ShareAlike 3.0
+// Unported [License](https://creativecommons.org/licenses/by-nc-sa/3.0/).
+
+
+// The ExtendAlu chip is an extension of the standard ALU which also supports
+// shift operations.
+// The inputs of the extended ALU are instruction[9], x[16], y[16].
+// The "ng" and "zr" output pins behave the same as in the regular ALU.
+// The "out" output is defined as follows:
+// If instruction[8]=1 and instruction[7]=1 the output is identical to the 
+// regular ALU, where:
+// instruction[5]=zx, instruction[4]=nx, ..., instruction[0]=no
+// Else, if instruction[8]=0 and instruction[7]=1, the output is a shift:
+// - If instruction[4] == 0, the input "y" will be shifted, otherwise "x".
+// - If instruction[5] == 0, the shift will be a right-shift, otherwise left.
+// - All other inputs are undefined.
+
+CHIP ExtendAlu {
+    IN x[16], y[16], instruction[9];
+    OUT out[16], zr, ng;
+     
+    PARTS:
+    
+	// ALU
+	And(a=instruction[7], b=instruction[8], out=NoShift); // NS -> No Shift
+	ALU(x=x, y=y, zx=instruction[5], nx=instruction[4], zy=instruction[3], ny=instruction[2], f=instruction[1], no=instruction[0], out=outALU, zr=zrALU, ng=ngALU);
+	
+	// Shift
+	ShiftRight(in=y, out=yShiftRight);
+	ShiftLeft(in=y, out=yShiftLeft);
+	ShiftRight(in=x, out=xShiftRight);
+	ShiftLeft(in=x, out=xShiftLeft);
+	Mux4Way16(a=yShiftRight ,b=xShiftRight ,c=yShiftLeft ,d=xShiftLeft ,sel=instruction[4..5] ,out=outShift);
+	
+	// out
+	Mux4Way16(a=false ,b=outShift, c=false, d=outALU, sel=instruction[7..8], out=out, out[15]=negBit, out[0..7]=outLeft, out[8..15]=outRight);	
+	
+	// zr
+	Or8Way(in=outLeft, out=zrLeft);
+	Or8Way(in=outRight, out=zrRight);
+	Or(a=zrLeft, b=zrRight, out=notZR);
+	Not(in=notZR, out=zr);
+	
+	// ng
+	And(a=negBit, b=true, out=ng);
+	
+}

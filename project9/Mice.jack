@@ -1,0 +1,153 @@
+class Mice {
+
+   field int x, y, location;
+   field int memAddress;
+   field bool movment;
+   field int a;
+
+   /** Constructs a new mice. */
+   constructor Mice new(int Ax, int Ay) {
+    let x = Ax;
+    let y = Ay;
+    do location_calc();
+    do draw();
+    let movment = true;
+    let a = 0;
+    return this;
+   }
+
+    method void location_calc(){
+    let location = x+(16*32*y);
+    return;
+    }
+
+   method void dispose() {
+      do Memory.deAlloc(this);
+      return;
+   }
+
+   method void draw() {
+	let memAddress = 16384+location;
+	do Memory.poke(memAddress+0, 0);
+	do Memory.poke(memAddress+32, 0);
+	do Memory.poke(memAddress+64, 6144);
+	do Memory.poke(memAddress+96, 8192);
+	do Memory.poke(memAddress+128, 16384);
+	do Memory.poke(memAddress+160, 16496);
+	do Memory.poke(memAddress+192, 20048);
+	do Memory.poke(memAddress+224, 20816);
+	do Memory.poke(memAddress+256, 20728);
+	do Memory.poke(memAddress+288, 20548);
+	do Memory.poke(memAddress+320, 20490);
+	do Memory.poke(memAddress+352, 28673);
+	do Memory.poke(memAddress+384, 4095);
+	do Memory.poke(memAddress+416, 0);
+	do Memory.poke(memAddress+448, 0);
+	do Memory.poke(memAddress+480, 0);
+	return;
+   }
+
+   /** Erases the Mice from the screen. */
+   method void erase() {
+        let memAddress = 16384+location;
+        do Memory.poke(memAddress+0, 0);
+        do Memory.poke(memAddress+32, 0);
+        do Memory.poke(memAddress+64, 0);
+        do Memory.poke(memAddress+96, 0);
+        do Memory.poke(memAddress+128, 0);
+        do Memory.poke(memAddress+160, 0);
+        do Memory.poke(memAddress+192, 0);
+        do Memory.poke(memAddress+224, 0);
+        do Memory.poke(memAddress+256, 0);
+        do Memory.poke(memAddress+288, 0);
+        do Memory.poke(memAddress+320, 0);
+        do Memory.poke(memAddress+352, 0);
+        do Memory.poke(memAddress+384, 0);
+        do Memory.poke(memAddress+416, 0);
+        do Memory.poke(memAddress+448, 0);
+        do Memory.poke(memAddress+480, 0);
+        return;
+   }
+
+
+
+   /** Moves the mice up 16. */
+   method void moveUp() {
+      if (y > 0) {
+        do erase();
+        let y = y-1;
+        do location_calc();
+        do draw();
+      }
+      return;
+   }
+
+   /** Moves the Mice down by 16 pixels. */
+   method void moveDown() {
+      if (y < 15) {
+        do erase();
+        let y = y+1;
+        do location_calc();
+        do draw();
+      }
+      return;
+   }
+
+   /** Moves the Mice left by 16 pixels. */
+   method void moveLeft() {
+      if (x > 0) {
+        do erase();
+        let x = x-1;
+        do location_calc();
+        do draw();
+      }
+      return;
+   }
+
+   /** Moves the Mice right by 16 pixels. */
+   method void moveRight() {
+      if (x < 31) {
+        do erase();
+        let x = x+1;
+        do location_calc();
+        do draw();
+      }
+      return;
+   }
+
+   method void move()
+   {
+    let a = a+1;
+    if (a>15)
+    {
+    if (movment) {
+       do moveRight();
+       if (x=31) 
+       {
+        let movment = false;
+       }
+    }
+    if (movment=false) {
+       do moveLeft();
+       if (x=0) 
+       {
+        let movment = true;
+       }
+    }
+    let a = 0;
+    }
+    return;
+   }
+
+   method int getx(){
+   return x;
+   }
+
+   method int gety(){
+   return y;
+   }
+
+   method int getlocation(){
+   return location;
+   }
+}

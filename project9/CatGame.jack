@@ -1,0 +1,274 @@
+
+class CatGame {
+   field Cat cat; // the Cat of this game
+   field CountPoints countPoints;
+   field int direction; // 0=none, 1=up, 2=down, 3=left, 4=right
+   field int i;
+   field Mice mice1;
+   field Mice mice2;
+   field Mice mice3;
+   field Array all_mice;
+   field Dog dog;
+   field int k;
+   field int counter;
+   field char key;
+   field bool game_is_over;
+
+   constructor CatGame new() {
+      let countPoints = CountPoints.new();
+      let cat = Cat.new(0, 0);
+      do GenerateMice();
+      let dog = Dog.new(5, 5);
+      let direction = 0; // initial state is no movement
+      let k =0 ;
+      let counter = -1;
+      let game_is_over = false;
+      return this;
+   }
+
+   method void GenerateMice() {
+      let i=0;
+      let all_mice = Array.new(11);
+      while (i<10) {
+         let i = i+1;
+         let all_mice[i] = Mice.new(2*i,i+2); 
+      }
+      return;
+   }
+
+   /** Disposes this game. */
+   method void dispose() {
+      do cat.dispose();
+      do dog.dispose();
+      do Memory.deAlloc(this);
+      return;
+   }
+
+   /** Moves the Cat in the current direction. */
+   method void moveCat() {
+      if (direction = 1) {
+       do cat.moveUp();
+      }
+      if (direction = 2) {
+         do cat.moveDown();
+         let counter = counter +1;
+         do ScreenDown();
+      }
+      if (direction = 3) {
+        do cat.moveLeft();
+      }
+      if (direction = 4) {
+        do cat.moveRight(); 
+      }
+      do Sys.wait(1);  // delays the next movement
+      return;
+   } 
+
+   method void ScreenDown() {
+      var int memAddress;
+      var int l;
+      var int tmp;
+      let l = 32;
+      if (counter <14) {
+         while (l > -1) {
+            
+            let tmp  = counter;
+            while (tmp >-1) {
+               let memAddress = 16384+l+(16*32*tmp);
+               do Memory.poke(memAddress+0, -1);
+               do Memory.poke(memAddress+32, -1);
+               do Memory.poke(memAddress+64, -1);
+               do Memory.poke(memAddress+96, -1);
+               do Memory.poke(memAddress+128, -1);
+               do Memory.poke(memAddress+160, -1);
+               do Memory.poke(memAddress+192, -1);
+               do Memory.poke(memAddress+224, -1);
+               do Memory.poke(memAddress+256, -1);
+               do Memory.poke(memAddress+288, -1);
+               do Memory.poke(memAddress+320, -1);
+               do Memory.poke(memAddress+352, -1);
+               do Memory.poke(memAddress+384, -1);
+               do Memory.poke(memAddress+416, -1);
+               do Memory.poke(memAddress+448, -1);
+               do Memory.poke(memAddress+480, -1);
+               let tmp = tmp -1;
+            }
+         let l = l-1;
+         }
+      }
+      return;
+   }
+
+   method void CheckCollision() {
+      var int A;
+      var int B;
+      var int C;
+      var int Ay;
+      var int Cy;
+      var int Ax;
+      var int Cx;
+      var Mice mice5;
+      var int ind;
+      let ind = 1;
+
+      while (ind < 11) {
+         if (~(all_mice[ind] = 1)) {
+            let mice5 = all_mice[ind];
+            let A = cat.getlocation();
+            let B = mice5.getlocation();
+            let C = dog.getlocation();
+
+            if (A = B) {
+               do mice5.dispose();
+               let all_mice[ind] = 1;
+               do countPoints.DrawScore();
+            }
+            let A = cat.gety();
+            let B = mice5.gety();
+            if (A > B) {
+               do mice5.dispose();
+               let all_mice[ind] = 1;
+            }
+            
+            let A = cat.getlocation();
+            if (A = C) {
+               let game_is_over = true;
+               return;
+            }
+            let A = cat.gety();
+            let B = mice5.gety();
+
+         }
+         let ind = ind + 1;
+         }
+      return;
+   }
+
+   /** Runs the game: handles the user's inputs and moves the square accordingly */
+   method void run() {
+      // the key currently pressed by the user
+      var boolean exit;
+      let exit = false;
+      
+      while (~exit) {
+         do ScreenDown();
+         let k = k+1;
+         if (k>8) {
+            let k = 1;
+         }
+         
+         if (~(all_mice[k] = 1)) {
+            let mice1 = all_mice[k];
+         } else {
+            let mice1 = null;
+         }
+         if (~(all_mice[k+1] = 1)) {
+            let mice2 = all_mice[k+1];
+         } else {
+            let mice2 = null;
+         }
+         if (~(all_mice[k+2] = 1)) {
+            let mice3 = all_mice[k+2];
+         } else {
+            let mice3 = null;
+         }
+
+         do CheckCollision();
+         if (game_is_over) {
+               do game_over();
+               let exit = true;
+         }
+
+         if (~(mice1 = null)) {
+            do mice1.move();
+         }
+         // waits for a key to be pressed
+         while (key = 0) {
+            if (~(mice1 = null)) {
+               do mice1.move();
+            }
+            if (~(mice2 = null)) {
+               do mice2.move();
+            }
+            if (~(mice3 = null)) {
+               do mice3.move();
+            }
+            if (~(dog = null)) {
+               do dog.move(cat.gety());
+            }
+            do end_game();
+            let key = Keyboard.keyPressed();
+            do moveCat();
+            do CheckCollision();
+            if (game_is_over) {
+               do game_over();
+               let exit = true;
+            }
+         }
+
+         if (key = 131) { let direction = 1; }   // up arrow
+         if (key = 133) { let direction = 2; }   // down arrow
+         if (key = 130) { let direction = 3; }   // left arrow
+         if (key = 132) { let direction = 4; }   // right arrow
+
+         // waits for the key to be released
+         while (~(key = 0)) {
+            do key_not_0();
+         }
+         do end_game();
+     } // while
+     return;
+   }
+
+   //getters
+   method Mice get_mice1() {
+      return mice1;
+   }
+
+   method Mice get_mice2() {
+      return mice2;
+   }
+
+   method Mice get_mice3() {
+      return mice3;
+   }
+
+   method void key_not_0() {
+      if (~(mice3 = null)) {
+         do mice3.move();
+      }
+      if (~(mice2 = null)) {
+         do mice2.move();
+      }
+      if (~(mice1 = null)) {
+         do mice1.move();
+      }
+      let key = Keyboard.keyPressed();
+      do moveCat();
+      let direction = 0;
+      do CheckCollision();
+      return;
+   }
+
+   method void end_game() {
+      var int tmp;
+      let tmp = cat.gety();
+      if (tmp >13) {
+         do countPoints.Draw_nice();
+      }
+      return;
+   }
+
+   method void game_over() {
+      var int i;
+      var int memAddress;
+      let i = 0;
+      let memAddress = 16384;
+      while (i < 8192) {
+         do Memory.poke(memAddress+i, -1);
+         let i = i + 1;
+      }
+      return;
+   }
+}
+
